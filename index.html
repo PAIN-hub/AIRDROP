@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Wallet Access</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #0066CC;
+            --light-blue: #E3F2FD;
+            --accent-blue: #1E88E5;
+            --white: #FFFFFF;
+            --light-gray: #F5F5F5;
+            --dark-gray: #2C3E50;
+            --border-color: #D0E8FF;
+            --success-green: #4CAF50;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--white) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--dark-gray);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 1200px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .illustration-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(227, 242, 253, 0.6) 0%, rgba(255, 255, 255, 0.4) 100%);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .illustration-section::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(30, 136, 229, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -100px;
+            right: -100px;
+        }
+
+        .illustration-section img {
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            padding: 40px;
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 102, 204, 0.08);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-header {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .form-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            line-height: 1.2;
+        }
+
+        .form-header p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .step-indicator {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--light-gray);
+            transition: all 0.3s ease;
+        }
+
+        .step-dot.active {
+            background: var(--primary-blue);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 0;
+            animation: slideIn 0.5s ease forwards;
+        }
+
+        .input-group.hidden {
+            display: none;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group label i {
+            color: var(--accent-blue);
+            font-size: 16px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--light-gray);
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--primary-blue);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.08);
+        }
+
+        input, select {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            color: var(--dark-gray);
+            outline: none;
+            font-family: inherit;
+        }
+
+        input::placeholder {
+            color: #999;
+        }
+
+        .country-flag {
+            font-size: 20px;
+            min-width: 28px;
+        }
+
+        .phone-code {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .input-icon {
+            color: var(--accent-blue);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .error-message {
+            font-size: 12px;
+            color: #D32F2F;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: -8px;
+        }
+
+        .success-message {
+            font-size: 12px;
+            color: var(--success-green);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: -8px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+            color: var(--white);
+            flex: 1;
+            min-height: 48px;
+            box-shadow: 0 4px 16px rgba(0, 102, 204, 0.24);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0, 102, 204, 0.32);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--white);
+            border-color: var(--primary-blue);
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: var(--white);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(44, 62, 80, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .success-modal {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 48px 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 102, 204, 0.16);
+            animation: modalSlideIn 0.4s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 40px;
+            color: var(--success-green);
+            animation: scaleIn 0.5s ease 0.2s backwards;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .success-modal h2 {
+            font-size: 28px;
+            color: var(--primary-blue);
+            margin-bottom: 16px;
+            animation: slideIn 0.5s ease 0.1s backwards;
+        }
+
+        .success-modal p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 32px;
+            animation: slideIn 0.5s ease 0.2s backwards;
+        }
+
+        .confirmation-text {
+            background: var(--light-blue);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: var(--primary-blue);
+            font-weight: 600;
+            animation: slideIn 0.5s ease 0.3s backwards;
+        }
+
+        .countdown {
+            font-size: 13px;
+            color: #999;
+            margin-top: 16px;
+        }
+
+        .close-modal-btn {
+            width: 100%;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .illustration-section {
+                min-height: 300px;
+                display: none;
+            }
+
+            .form-section {
+                padding: 32px 20px;
+            }
+
+            .form-header h1 {
+                font-size: 24px;
+            }
+
+            .success-modal {
+                padding: 40px 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Illustration Section -->
+        <div class="illustration-section">
+            <img src="/public/wallet-illustration.jpg" alt="Secure Wallet Access">
+        </div>
+
+        <!-- Form Section -->
+        <div class="form-section">
+            <div class="form-header">
+                <div class="step-indicator">
+                    <div class="step-dot active" id="step1Dot"></div>
+                    <div class="step-dot" id="step2Dot"></div>
+                    <div class="step-dot" id="step3Dot"></div>
+                </div>
+                <h1 id="formTitle">Secure Access</h1>
+                <p id="formDescription">Enter your phone number to continue</p>
+            </div>
+
+            <!-- Step 1: Phone Number & Country -->
+            <div id="step1" class="input-group">
+                <label for="countrySelect"><i class="fas fa-globe"></i> Select Country</label>
+                <div class="input-wrapper">
+                    <span class="country-flag" id="countryFlag">🌍</span>
+                    <select id="countrySelect">
+                        <option value="">Choose your country</option>
+                    </select>
+                </div>
+
+                <label for="phoneInput" style="margin-top: 20px;"><i class="fas fa-mobile-alt"></i> Phone Number</label>
+                <div class="input-wrapper">
+                    <span class="phone-code" id="phoneCode">+1</span>
+                    <input type="tel" id="phoneInput" placeholder="Enter your phone number">
+                </div>
+                <div class="error-message" id="phoneError" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="phoneErrorText"></span>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-primary" id="step1Next">
+                        Continue
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Wallet Address -->
+            <div id="step2" class="input-group hidden">
+                <label for="walletInput"><i class="fas fa-wallet"></i> ERC20 Wallet Address</label>
+                <div class="input-wrapper">
+                    <input type="text" id="walletInput" placeholder="0x...">
+                    <span class="input-icon" id="walletIcon"></span>
+                </div>
+                <div class="error-message" id="walletError" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="walletErrorText"></span>
+                </div>
+                <div class="success-message" id="walletSuccess" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Valid wallet address</span>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" id="step2Back">
+                        <i class="fas fa-arrow-left"></i>
+                        Back
+                    </button>
+                    <button type="button" class="btn-primary" id="step2Submit">
+                        Submit
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="success-modal">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2>Request Submitted!</h2>
+            <p>Your wallet address has been securely submitted.</p>
+            <div class="confirmation-text">
+                <i class="fas fa-hourglass-end"></i> Please wait 7 days for confirmation
+            </div>
+            <p style="font-size: 13px; color: #999; margin-bottom: 24px;">
+                We'll verify your information and contact you within this timeframe.
+            </p>
+            <button type="button" class="btn-primary close-modal-btn" id="closeModalBtn">
+                Done
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Country data with African nations prioritized
+        const countries = [
+            { name: 'South Africa', code: 'ZA', flag: '🇿🇦', phone: '+27' },
+            { name: 'Nigeria', code: 'NG', flag: '🇳🇬', phone: '+234' },
+            { name: 'Kenya', code: 'KE', flag: '🇰🇪', phone: '+254' },
+            { name: 'Egypt', code: 'EG', flag: '🇪🇬', phone: '+20' },
+            { name: 'Ghana', code: 'GH', flag: '🇬🇭', phone: '+233' },
+            { name: 'Ethiopia', code: 'ET', flag: '🇪🇹', phone: '+251' },
+            { name: 'Morocco', code: 'MA', flag: '🇲🇦', phone: '+212' },
+            { name: 'Uganda', code: 'UG', flag: '🇺🇬', phone: '+256' },
+            { name: 'Tanzania', code: 'TZ', flag: '🇹🇿', phone: '+255' },
+            { name: 'Rwanda', code: 'RW', flag: '🇷🇼', phone: '+250' },
+            { name: 'Ivory Coast', code: 'CI', flag: '🇨🇮', phone: '+225' },
+            { name: 'Cameroon', code: 'CM', flag: '🇨🇲', phone: '+237' },
+            { name: 'Sudan', code: 'SD', flag: '🇸🇩', phone: '+249' },
+            { name: 'Angola', code: 'AO', flag: '🇦🇴', phone: '+244' },
+            { name: 'Zambia', code: 'ZM', flag: '🇿🇲', phone: '+260' },
+            { name: 'United States', code: 'US', flag: '🇺🇸', phone: '+1' },
+            { name: 'United Kingdom', code: 'GB', flag: '🇬🇧', phone: '+44' },
+            { name: 'Canada', code: 'CA', flag: '🇨🇦', phone: '+1' },
+            { name: 'Australia', code: 'AU', flag: '🇦🇺', phone: '+61' },
+            { name: 'Germany', code: 'DE', flag: '🇩🇪', phone: '+49' },
+        ];
+
+        let currentStep = 1;
+        let formData = { country: null, phone: null, wallet: null };
+
+        // Initialize country dropdown
+        function initializeCountries() {
+            const select = document.getElementById('countrySelect');
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.dataset.phone = country.phone;
+                option.dataset.flag = country.flag;
+                option.textContent = `${country.flag} ${country.name}`;
+                select.appendChild(option);
+            });
+
+            select.addEventListener('change', (e) => {
+                const selected = countries.find(c => c.code === e.target.value);
+                if (selected) {
+                    document.getElementById('countryFlag').textContent = selected.flag;
+                    document.getElementById('phoneCode').textContent = selected.phone;
+                    formData.country = selected;
+                    clearPhoneError();
+                }
+            });
+        }
+
+        // Phone validation
+        function validatePhone() {
+            const phone = document.getElementById('phoneInput').value.trim();
+            const phoneError = document.getElementById('phoneError');
+            const phoneErrorText = document.getElementById('phoneErrorText');
+
+            if (!phone) {
+                phoneErrorText.textContent = 'Phone number is required';
+                phoneError.style.display = 'flex';
+                return false;
+            }
+
+            if (!/^\d{6,15}$/.test(phone.replace(/\D/g, ''))) {
+                phoneErrorText.textContent = 'Please enter a valid phone number (6-15 digits)';
+                phoneError.style.display = 'flex';
+                return false;
+            }
+
+            if (!formData.country) {
+                phoneErrorText.textContent = 'Please select a country first';
+                phoneError.style.display = 'flex';
+                return false;
+            }
+
+            phoneError.style.display = 'none';
+            return true;
+        }
+
+        function clearPhoneError() {
+            document.getElementById('phoneError').style.display = 'none';
+        }
+
+        // Wallet validation (ERC20 format)
+        function validateWallet() {
+            const wallet = document.getElementById('walletInput').value.trim();
+            const walletError = document.getElementById('walletError');
+            const walletErrorText = document.getElementById('walletErrorText');
+            const walletSuccess = document.getElementById('walletSuccess');
+            const walletIcon = document.getElementById('walletIcon');
+
+            if (!wallet) {
+                walletErrorText.textContent = 'Wallet address is required';
+                walletError.style.display = 'flex';
+                walletSuccess.style.display = 'none';
+                walletIcon.innerHTML = '';
+                return false;
+            }
+
+            // ERC20 address format: 0x followed by 40 hex characters
+            if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
+                walletErrorText.textContent = 'Invalid ERC20 address format (0x + 40 hex characters)';
+                walletError.style.display = 'flex';
+                walletSuccess.style.display = 'none';
+                walletIcon.innerHTML = '';
+                return false;
+            }
+
+            walletError.style.display = 'none';
+            walletSuccess.style.display = 'flex';
+            walletIcon.innerHTML = '<i class="fas fa-check-circle" style="color: #4CAF50;"></i>';
+            return true;
+        }
+
+        // Real-time wallet validation
+        document.getElementById('walletInput').addEventListener('input', validateWallet);
+
+        // Step transitions
+        function goToStep(step) {
+            // Hide current step
+            document.getElementById(`step${currentStep}`).classList.add('hidden');
+            document.getElementById(`step${currentStep}Dot`).classList.remove('active');
+
+            // Show new step
+            currentStep = step;
+            document.getElementById(`step${currentStep}`).classList.remove('hidden');
+            document.getElementById(`step${currentStep}Dot`).classList.add('active');
+
+            // Update header
+            if (step === 1) {
+                document.getElementById('formTitle').textContent = 'Secure Access';
+                document.getElementById('formDescription').textContent = 'Enter your phone number to continue';
+            } else if (step === 2) {
+                document.getElementById('formTitle').textContent = 'Verify Wallet';
+                document.getElementById('formDescription').textContent = 'Submit your ERC20 wallet address';
+            }
+        }
+
+        // Step 1: Continue button
+        document.getElementById('step1Next').addEventListener('click', () => {
+            if (validatePhone()) {
+                const phone = document.getElementById('phoneInput').value.trim();
+                formData.phone = `${formData.country.phone} ${phone}`;
+                goToStep(2);
+            }
+        });
+
+        // Step 2: Back button
+        document.getElementById('step2Back').addEventListener('click', () => {
+            document.getElementById('walletInput').value = '';
+            document.getElementById('walletError').style.display = 'none';
+            document.getElementById('walletSuccess').style.display = 'none';
+            goToStep(1);
+        });
+
+        // Step 2: Submit button
+        document.getElementById('step2Submit').addEventListener('click', () => {
+            if (validateWallet()) {
+                const wallet = document.getElementById('walletInput').value.trim();
+                formData.wallet = wallet;
+
+                // Show loading state
+                const btn = document.getElementById('step2Submit');
+                btn.classList.add('loading');
+                btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+                // Simulate submission
+                setTimeout(() => {
+                    btn.classList.remove('loading');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Submit';
+                    showSuccessModal();
+                }, 1500);
+            }
+        });
+
+        // Success modal
+        function showSuccessModal() {
+            document.getElementById('successModal').classList.add('active');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('active');
+            // Reset form
+            document.getElementById('countrySelect').value = '';
+            document.getElementById('phoneInput').value = '';
+            document.getElementById('walletInput').value = '';
+            document.getElementById('countryFlag').textContent = '🌍';
+            document.getElementById('phoneCode').textContent = '+1';
+            document.getElementById('walletError').style.display = 'none';
+            document.getElementById('walletSuccess').style.display = 'none';
+            formData = { country: null, phone: null, wallet: null };
+            goToStep(1);
+        }
+
+        document.getElementById('closeModalBtn').addEventListener('click', closeSuccessModal);
+
+        // Close modal on overlay click
+        document.getElementById('successModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('successModal')) {
+                closeSuccessModal();
+            }
+        });
+
+        // Phone input formatting
+        document.getElementById('phoneInput').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+        });
+
+        // Initialize
+        initializeCountries();
+    </script>
+</body>
+</html>
